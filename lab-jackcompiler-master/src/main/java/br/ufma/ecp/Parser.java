@@ -15,7 +15,8 @@ public class Parser {
     private StringBuilder xmlOutput = new StringBuilder();
     private VMWriter vmWriter = new VMWriter();
     private int ifLabelNum = 0 ;
-private int whileLabelNum = 0;
+    private int whileLabelNum = 0;
+    private SymbolTable symTable = new SymbolTable();
     public Parser(byte[] input) {
         scan = new Scanner(input);
         nextToken();
