@@ -4,6 +4,9 @@ import br.ufma.ecp.token.Token;
 import br.ufma.ecp.token.TokenType;
 import static br.ufma.ecp.token.TokenType.*;
 
+import br.ufma.ecp.VMWriter.Command;
+import br.ufma.ecp.VMWriter.Segment;
+
 public class Parser {
     private static class ParseError extends RuntimeException {}
     private Scanner scan;
@@ -130,6 +133,8 @@ void parseClassVarDec() {
         switch (peekToken.type) {
             case NUMBER:
                 expectPeek(NUMBER);
+                vmWriter.writePush(Segment.CONST, Integer.parseInt(currentToken.lexeme));
+
                 break;
             case STRING:
                 expectPeek(STRING);
@@ -171,9 +176,7 @@ void parseClassVarDec() {
         return op != "" && "+-*/<>=~&|".contains(op);
     }
 
-    public String VMOutput() {
-        return "";
-    }
+
  
     void parseIf() {
         printNonTerminal("ifStatement");
@@ -204,12 +207,14 @@ void parseClassVarDec() {
         printNonTerminal("/expressionList");
     }
 
-    void parseExpression() {
+    public void parseExpression() {
         printNonTerminal("expression");
         parseTerm ();
         while (isOperator(peekToken.lexeme)) {
+            var ope = peekToken.type;
             expectPeek(peekToken.type);
             parseTerm();
+            compileOperators(ope);
         }
         printNonTerminal("/expression");
     }
@@ -360,6 +365,34 @@ void parseClassVarDec() {
 
         expectPeek(SEMICOLON);
         printNonTerminal("/varDec");
+    }
+    public void compileOperators(TokenType type) {
+
+        if (type == ASTERISK) {
+            vmWriter.writeCall("Math.multiply", 2);
+        } else if (type == SLASH) {
+            vmWriter.writeCall("Math.divide", 2);
+        } else {
+            vmWriter.writeArithmetic(typeOperator(type));
+        }
+    }
+
+    private Command typeOperator(TokenType type) {
+        if (type == PLUS)
+            return Command.ADD;
+        if (type == MINUS)
+            return Command.SUB;
+        if (type == LT)
+            return Command.LT;
+        if (type == GT)
+            return Command.GT;
+        if (type == EQ)
+            return Command.EQ;
+        if (type == AND)
+            return Command.AND;
+        if (type == OR)
+            return Command.OR;
+        return null;
     }
     public String VMOutput() {
         return vmWriter.vmOutput();
