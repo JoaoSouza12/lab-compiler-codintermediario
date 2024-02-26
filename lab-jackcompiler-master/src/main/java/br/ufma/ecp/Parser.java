@@ -10,7 +10,7 @@ public class Parser {
     private Token currentToken;
     private Token peekToken;
     private StringBuilder xmlOutput = new StringBuilder();
-    
+    private VMWriter vmWriter = new VMWriter();
     public Parser(byte[] input) {
         scan = new Scanner(input);
         nextToken();
@@ -361,4 +361,7 @@ void parseClassVarDec() {
         expectPeek(SEMICOLON);
         printNonTerminal("/varDec");
     }
+    public String VMOutput() {
+        return vmWriter.vmOutput();
+}
 }
