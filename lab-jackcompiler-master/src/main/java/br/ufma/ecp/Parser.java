@@ -14,6 +14,8 @@ public class Parser {
     private Token peekToken;
     private StringBuilder xmlOutput = new StringBuilder();
     private VMWriter vmWriter = new VMWriter();
+    private int ifLabelNum = 0 ;
+private int whileLabelNum = 0;
     public Parser(byte[] input) {
         scan = new Scanner(input);
         nextToken();
@@ -179,6 +181,8 @@ void parseClassVarDec() {
 
  
     void parseIf() {
+       
+        ifLabelNum++;
         printNonTerminal("ifStatement");
         expectPeek(IF);
         expectPeek(LPAREN);
@@ -316,7 +320,9 @@ void parseClassVarDec() {
         parseParameterList();
         expectPeek(RPAREN);
         parseSubroutineBody();
-
+        
+        ifLabelNum = 0;
+        whileLabelNum = 0;
         printNonTerminal("/subroutineDec");
     }
 
