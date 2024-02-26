@@ -325,9 +325,15 @@ public class Parser {
         parseSubroutineBody();
         symTable.startSubroutine();
 
+        
+        printNonTerminal("/subroutineDec");
         ifLabelNum = 0;
         whileLabelNum = 0;
-        printNonTerminal("/subroutineDec");
+        symTable.startSubroutine();
+        expectPeek(TokenType.CONSTRUCTOR, TokenType.FUNCTION, TokenType.METHOD);
+        var subroutineType = currentToken.type;
+      
+        
     }
 
     void parseParameterList() {
