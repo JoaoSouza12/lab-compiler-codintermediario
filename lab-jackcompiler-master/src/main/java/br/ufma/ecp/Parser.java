@@ -323,7 +323,8 @@ public class Parser {
         parseParameterList();
         expectPeek(RPAREN);
         parseSubroutineBody();
-        
+        symTable.startSubroutine();
+
         ifLabelNum = 0;
         whileLabelNum = 0;
         printNonTerminal("/subroutineDec");
