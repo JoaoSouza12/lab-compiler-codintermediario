@@ -4,6 +4,7 @@ import br.ufma.ecp.token.Token;
 import br.ufma.ecp.token.TokenType;
 import static br.ufma.ecp.token.TokenType.*;
 
+import br.ufma.ecp.SymbolTable.Kind;
 import br.ufma.ecp.VMWriter.Command;
 import br.ufma.ecp.VMWriter.Segment;
 
@@ -115,21 +116,7 @@ public class Parser {
         }
    }
 
-void parseClassVarDec() {
-    printNonTerminal("classVarDec");
-    expectPeek(FIELD, STATIC);
-    // 'int' | 'char' | 'boolean' | className
-    expectPeek(INT, CHAR, BOOLEAN, IDENT);
-    expectPeek(IDENT);
 
-    while (peekTokenIs(COMMA)) {
-        expectPeek(COMMA);
-        expectPeek(IDENT);
-    }
-
-    expectPeek(SEMICOLON);
-    printNonTerminal("/classVarDec");
-}
 
   void parseTerm() {
         printNonTerminal("term");
@@ -365,7 +352,7 @@ void parseClassVarDec() {
         printNonTerminal("subroutineBody");
         expectPeek(LBRACE);
         while (peekTokenIs(VAR)) {
-            parseVarDec();
+            parseClassVarDec();
         }
 
         parseStatements();
@@ -373,21 +360,34 @@ void parseClassVarDec() {
         printNonTerminal("/subroutineBody");
     }
 
-    void parseVarDec() {
-        printNonTerminal("varDec");
-        expectPeek(VAR);
+    void parseClassVarDec() {
+        printNonTerminal("classVarDec");
+        expectPeek(FIELD, STATIC);
+
+        SymbolTable.Kind kind = Kind.STATIC;
+        if (currentTokenIs(FIELD))
+            kind = Kind.FIELD;
+
         // 'int' | 'char' | 'boolean' | className
         expectPeek(INT, CHAR, BOOLEAN, IDENT);
-        expectPeek(IDENT);
+        String type = currentToken.lexeme;
 
+        expectPeek(IDENT);
+        String name = currentToken.lexeme;
+
+        symTable.define(name, type, kind);
         while (peekTokenIs(COMMA)) {
             expectPeek(COMMA);
             expectPeek(IDENT);
+
+            name = currentToken.lexeme;
+            symTable.define(name, type, kind);
         }
 
         expectPeek(SEMICOLON);
-        printNonTerminal("/varDec");
+        printNonTerminal("/classVarDec");
     }
+
     public void compileOperators(TokenType type) {
 
         if (type == ASTERISK) {
