@@ -301,7 +301,43 @@ label WHILE_END0
                 """;
         assertEquals(expected, actual);
     }
+    
     @Test
+    public void termExpression () {
+        var input = """
+            class Point {
+              field int x, y;
+              constructor Point new(int Ax, int Ay) { 
+                var int w;             
+                let x = Ax;
+                let y = Ay;
+                let w = 42;
+                let x = w;
+                return this;
+             }
+            }
+            """;;
+        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+        parser.parse();
+        String actual = parser.VMOutput();
+        String expected = """
+            function Point.new 1
+            push constant 2
+            call Memory.alloc 1
+            pop pointer 0
+            push argument 0
+            pop this 0
+            push argument 1
+            pop this 1
+            push constant 42
+            pop local 0
+            push local 0
+            pop this 0
+            push pointer 0
+            return
+                """;
+        assertEquals(expected, actual);
+    }
     public void writeFunctionTest() {
 
         var input = """
