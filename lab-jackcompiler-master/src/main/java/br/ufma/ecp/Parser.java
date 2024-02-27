@@ -494,6 +494,17 @@ public class Parser {
     public String VMOutput() {
         return vmWriter.vmOutput();
 }
+private Segment kind2Segment(Kind kind) {
+    if (kind == Kind.STATIC)
+        return Segment.STATIC;
+    if (kind == Kind.FIELD)
+        return Segment.THIS;
+    if (kind == Kind.VAR)
+        return Segment.LOCAL;
+    if (kind == Kind.ARG)
+        return Segment.ARG;
+    return null;
+}
 private Command typeOperator(TokenType type) {
     if (type == PLUS)
         return Command.ADD;
