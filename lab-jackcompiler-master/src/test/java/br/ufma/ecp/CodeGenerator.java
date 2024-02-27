@@ -332,6 +332,36 @@ label WHILE_END0
         assertEquals(expected, actual);
     }
     @Test
+    public void termExpressionLiteralKeyword () {
+        var input = """
+            class Main {
+                function void main () {
+                    var bool x;
+                    let x = true;
+                    let x = false;
+                    let x = null;
+                    return;
+                }
+            }
+            """;;
+        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+        parser.parse();
+        String actual = parser.VMOutput();
+        String expected = """
+            function Main.main 1
+            push constant 0
+            not
+            pop local 0
+            push constant 0
+            pop local 0
+            push constant 0
+            pop local 0
+            push constant 0
+            return
+                """;
+        assertEquals(expected, actual);
+    }
+    @Test
     public void termExpressionVar () {
         var input = """
             class Main {
