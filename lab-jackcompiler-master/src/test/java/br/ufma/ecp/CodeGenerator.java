@@ -343,6 +343,41 @@ label WHILE_END0
         assertEquals(expected, actual);
     }
     @Test
+    public void ifTest () {
+        var input = """
+            class Main {
+                function void main () {
+                    var int sum, i;
+                    let i = 0;
+                    if (i < 10) {
+                        let sum = 42;
+                    }
+                    return;
+                }
+            }
+            """;;
+        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+        parser.parse();
+        String actual = parser.VMOutput();
+        String expected = """
+            function Main.main 2
+            push constant 0
+            pop local 1
+            push local 1
+            push constant 10
+            lt
+            if-goto IF_TRUE0
+            goto IF_FALSE0
+            label IF_TRUE0
+            push constant 42
+            pop local 0
+            label IF_FALSE0
+            push constant 0
+            return         
+                """;
+        assertEquals(expected, actual);
+    }
+    @Test
     public void ifElseTest () {
         var input = """
             class Main {
