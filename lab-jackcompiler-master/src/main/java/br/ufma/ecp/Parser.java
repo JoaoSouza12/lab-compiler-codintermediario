@@ -22,6 +22,7 @@ public class Parser {
     private String className = "";
     public Parser(byte[] input) {
         scan = new Scanner(input);
+        vmWriter = new VMWriter();
         nextToken();
     }
 
@@ -34,26 +35,26 @@ public class Parser {
         var nArgs = 0;
 
         var ident = currentToken.value();
-        var symbol = symbolTable.resolve(ident); // classe ou objeto
+        var symbol = symbolTable.resolve(ident); 
         var functionName = ident + ".";
 
-        if (peekTokenIs(LPAREN)) { // método da propria classe
+        if (peekTokenIs(LPAREN)) { 
             expectPeek(LPAREN);
             vmWriter.writePush(Segment.POINTER, 0);
             nArgs = parseExpressionList() + 1;
             expectPeek(RPAREN);
             functionName = className + "." + ident;
         } else {
-            // pode ser um metodo de um outro objeto ou uma função
+            
             expectPeek(DOT);
-            expectPeek(IDENTIFIER); // nome da função
+            expectPeek(IDENTIFIER); 
 
-            if (symbol != null) { // é um metodo
+            if (symbol != null) { 
                 functionName = symbol.type() + "." + currentToken.value();
                 vmWriter.writePush(kind2Segment(symbol.kind()), symbol.index());
-                nArgs = 1; // do proprio objeto
+                nArgs = 1; 
             } else {
-                functionName += currentToken.value(); // é uma função
+                functionName += currentToken.value(); 
             }
 
             expectPeek(LPAREN);
