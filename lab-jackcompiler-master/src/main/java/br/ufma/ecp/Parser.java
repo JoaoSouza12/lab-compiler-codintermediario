@@ -5,6 +5,7 @@ import br.ufma.ecp.token.TokenType;
 import static br.ufma.ecp.token.TokenType.*;
 
 import br.ufma.ecp.SymbolTable.Kind;
+import br.ufma.ecp.SymbolTable.Symbol;
 import br.ufma.ecp.VMWriter.Command;
 import br.ufma.ecp.VMWriter.Segment;
 
@@ -47,7 +48,8 @@ public class Parser {
         expectPeek(CLASS);
         expectPeek(IDENT);
         expectPeek(LBRACE);
-        
+        className = currentToken.lexeme;
+
         while (peekTokenIs(STATIC) || peekTokenIs(FIELD)) {
             System.out.println(peekToken);
             parseClassVarDec();
@@ -138,17 +140,24 @@ public class Parser {
                 break;
             case IDENT:
                 expectPeek(IDENT);
-                if (peekTokenIs(LPAREN) || peekTokenIs(DOT)) {
-                    parseSubroutineCall();
-                } else { // variavel comum ou array
-                    if (peekTokenIs(LBRACKET)) { // array
-                        expectPeek(LBRACKET);
-                        parseExpression();
-                        expectPeek(RBRACKET);
-                    } 
+                Symbol sym = symTable.resolve(currentToken.lexeme);
+
+                if (peekTokenIs(LBRACKET)) { // array
+                    expectPeek(LBRACKET);
+                    parseExpression();
+                    vmWriter.writePush(kind2Segment(sym.kind()), sym.index());
+                    vmWriter.writeArithmetic(Command.ADD);
+    
+
+                    expectPeek(RBRACKET);
+                    vmWriter.writePop(Segment.POINTER, 1); // pop address pointer into pointer 1
+                    vmWriter.writePush(Segment.THAT, 0);   // push the value of the address pointer back onto stack
+    
+                } else {
+                    vmWriter.writePush(kind2Segment(sym.kind()), sym.index());
                 }
                 break;
-            case LPAREN:
+                case LPAREN:
                 expectPeek(LPAREN);
                 parseExpression();
                 expectPeek(RPAREN);
@@ -215,22 +224,39 @@ public class Parser {
 
 
     void parseLet() {
+        var isArray = false;
+
         printNonTerminal("letStatement");
         expectPeek(LET);
         expectPeek(IDENT);
 
-        if (peekTokenIs(LBRACKET)) {
+        if (peekTokenIs(LBRACKET)) { // array
             expectPeek(LBRACKET);
             parseExpression();
+            
+            vmWriter.writePush(kind2Segment(symbol.kind()), symbol.index());
+            vmWriter.writeArithmetic(Command.ADD);
+    
             expectPeek(RBRACKET);
+
+
+
+            isArray = true;
         }
 
         expectPeek(EQ);
         parseExpression();
-        expectPeek(SEMICOLON);
-        printNonTerminal("/letStatement");
-    }
+        if (isArray) {
 
+            vmWriter.writePop(Segment.TEMP, 0);    // push result back onto stack
+            vmWriter.writePop(Segment.POINTER, 1); // pop address pointer into pointer 1
+            vmWriter.writePush(Segment.TEMP, 0);   // push result back onto stack
+            vmWriter.writePop(Segment.THAT, 0);    // Store right hand side evaluation in THAT 0.
+    
+
+        } else {
+            vmWriter.writePop(kind2Segment(symbol.kind()), symbol.index());
+        }
 
         void parseStatements() {
             printNonTerminal("statements");
