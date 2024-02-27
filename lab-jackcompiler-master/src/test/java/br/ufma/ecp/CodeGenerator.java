@@ -302,6 +302,38 @@ label WHILE_END0
         assertEquals(expected, actual);
     }
     @Test
+    public void operatorTest () {
+        var input = """
+            class Main {
+                function void main () {
+                    do Output.printInt (10+20-60*4/2);
+                    return;
+                }
+            }
+            """;;
+        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+        parser.parse();
+        String actual = parser.VMOutput();
+        String expected = """
+            function Main.main 0
+            push constant 10
+            push constant 20
+            add
+            push constant 60
+            sub
+            push constant 4
+            call Math.multiply 2
+            push constant 2
+            call Math.divide 2
+            call Output.printInt 1
+            pop temp 0
+            push constant 0
+            return        
+                """;
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void helloTest () {
         var input = """
             class Main {
