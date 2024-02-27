@@ -369,6 +369,7 @@ public class Parser {
 
     void parseSubroutineDec() {
         printNonTerminal("subroutineDec");
+        ifLabelNum = 0;
         expectPeek(CONSTRUCTOR, FUNCTION, METHOD);
         // 'int' | 'char' | 'boolean' | className
         expectPeek(VOID, INT, CHAR, BOOLEAN, IDENT);
@@ -492,5 +493,24 @@ public class Parser {
     }
     public String VMOutput() {
         return vmWriter.vmOutput();
+}
+private Command typeOperator(TokenType type) {
+    if (type == PLUS)
+        return Command.ADD;
+    if (type == MINUS)
+        return Command.SUB;
+    if (type == LT)
+        return Command.LT;
+    if (type == GT)
+        return Command.GT;
+    if (type == EQ)
+        return Command.EQ;
+    if (type == AND)
+        return Command.AND;
+    if (type == OR)
+        return Command.OR;
+    return null;
+}
+
 }
 }
