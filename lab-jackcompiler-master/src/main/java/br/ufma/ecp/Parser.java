@@ -143,27 +143,42 @@ public class Parser {
 
 
 
-  void parseTerm() {
-        printNonTerminal("term");
-        switch (peekToken.type) {
-            case NUMBER:
-                expectPeek(NUMBER);
-                vmWriter.writePush(Segment.CONST, Integer.parseInt(currentToken.lexeme));
+   void parseTerm() {
+    printNonTerminal("term");
+    switch (peekToken.type) {
+        case INTEGER:
+            expectPeek(INTEGER);
+            vmWriter.writePush(Segment.CONST, Integer.parseInt(currentToken.value()));
+            break;
+        case STRING:
+            expectPeek(STRING);
+            var strValue = currentToken.value();
+            vmWriter.writePush(Segment.CONST, strValue.length());
+            vmWriter.writeCall("String.new", 1);
+            for (int i = 0; i < strValue.length(); i++) {
+                vmWriter.writePush(Segment.CONST, strValue.charAt(i));
+                vmWriter.writeCall("String.appendChar", 2);
+            }
+            break;
+        case FALSE:
+        case NULL:
+        case TRUE:
+            expectPeek(FALSE, NULL, TRUE);
+            vmWriter.writePush(Segment.CONST, 0);
+            if (currentToken.type == TRUE)
+                vmWriter.writeArithmetic(Command.NOT);
+            break;
+        case THIS:
+            expectPeek(THIS);
+            vmWriter.writePush(Segment.POINTER, 0);
+            break;
+        case IDENTIFIER:
+            expectPeek(IDENTIFIER);
+            Symbol sym = symbolTable.resolve(currentToken.value());
 
-                break;
-            case STRING:
-                expectPeek(STRING);
-                break;
-            case FALSE:
-            case NULL:
-            case TRUE:
-            case THIS:
-                expectPeek(FALSE, NULL, TRUE, THIS);
-                break;
-            case IDENT:
-                expectPeek(IDENT);
-                Symbol sym = symTable.resolve(currentToken.lexeme);
-
+            if (peekTokenIs(LPAREN) || peekTokenIs(DOT)) {
+                parseSubroutineCall();
+            } else { // variavel comum ou array
                 if (peekTokenIs(LBRACKET)) { // array
                     expectPeek(LBRACKET);
                     parseExpression();
@@ -178,22 +193,29 @@ public class Parser {
                 } else {
                     vmWriter.writePush(kind2Segment(sym.kind()), sym.index());
                 }
-                break;
-                case LPAREN:
-                expectPeek(LPAREN);
-                parseExpression();
-                expectPeek(RPAREN);
-                break;
-            case MINUS:
-            case NOT:
-                expectPeek(MINUS, NOT);
-                parseTerm();
-                break;
-            default:
-                ;
-        }
-        printNonTerminal("/term");
+            }
+            break;
+        case LPAREN:
+            expectPeek(LPAREN);
+            parseExpression();
+            expectPeek(RPAREN);
+            break;
+        case MINUS:
+        case NOT:
+            expectPeek(MINUS, NOT);
+            var op = currentToken.type;
+            parseTerm();
+            if (op == MINUS)
+                vmWriter.writeArithmetic(Command.NEG);
+            else
+                vmWriter.writeArithmetic(Command.NOT);
+
+            break;
+        default:
+            throw error(peekToken, "term expected");
     }
+    printNonTerminal("/term");
+}
     static public boolean isOperator(String op) {
         return op != "" && "+-*/<>=~&|".contains(op);
     }
