@@ -30,19 +30,40 @@ public class Parser {
     }
 
     void parseSubroutineCall() {
-        if (peekTokenIs(LPAREN)) {
+
+        var nArgs = 0;
+
+        var ident = currentToken.value();
+        var symbol = symbolTable.resolve(ident); // classe ou objeto
+        var functionName = ident + ".";
+
+        if (peekTokenIs(LPAREN)) { // método da propria classe
             expectPeek(LPAREN);
-            parseExpressionList();
+            vmWriter.writePush(Segment.POINTER, 0);
+            nArgs = parseExpressionList() + 1;
             expectPeek(RPAREN);
+            functionName = className + "." + ident;
         } else {
+            // pode ser um metodo de um outro objeto ou uma função
             expectPeek(DOT);
-            expectPeek(IDENT);
+            expectPeek(IDENTIFIER); // nome da função
+
+            if (symbol != null) { // é um metodo
+                functionName = symbol.type() + "." + currentToken.value();
+                vmWriter.writePush(kind2Segment(symbol.kind()), symbol.index());
+                nArgs = 1; // do proprio objeto
+            } else {
+                functionName += currentToken.value(); // é uma função
+            }
+
             expectPeek(LPAREN);
-            parseExpressionList();
+            nArgs += parseExpressionList();
+
             expectPeek(RPAREN);
         }
-    }
 
+        vmWriter.writeCall(functionName, nArgs);
+    }
     void parseClass() {
         printNonTerminal("class");
         expectPeek(CLASS);
@@ -192,22 +213,28 @@ public class Parser {
         printNonTerminal("/ifStatement");
     }
     
-    void parseExpressionList() {
-        printNonTerminal("expressionList");
-
-        if (!peekTokenIs(RPAREN)) // verifica se tem pelo menos uma expressao
-        {
-            parseExpression();
+        int parseExpressionList() {
+            printNonTerminal("expressionList");
+    
+            var nArgs = 0;
+    
+            if (!peekTokenIs(RPAREN)) // verifica se tem pelo menos uma expressao
+            {
+                parseExpression();
+                nArgs = 1;
+            }
+    
+            // procurando as demais
+            while (peekTokenIs(COMMA)) {
+                expectPeek(COMMA);
+                parseExpression();
+                nArgs++;
+            }
+    
+            printNonTerminal("/expressionList");
+            return nArgs;
         }
-
-        // procurando as demais
-        while (peekTokenIs(COMMA)) {
-            expectPeek(COMMA);
-            parseExpression();
-        }
-
-        printNonTerminal("/expressionList");
-    }
+    
 
     public void parseExpression() {
         printNonTerminal("expression");
