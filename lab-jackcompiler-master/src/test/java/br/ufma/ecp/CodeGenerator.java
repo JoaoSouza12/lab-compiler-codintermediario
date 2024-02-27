@@ -302,6 +302,39 @@ label WHILE_END0
         assertEquals(expected, actual);
     }
     @Test
+    public void helloTest () {
+        var input = """
+            class Main {
+                function void main () {
+                    do Output.printString ("Ola!");
+                    return;
+                }
+            }
+            """;;
+        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+        parser.parse();
+        String actual = parser.VMOutput();
+        String expected = """
+            function Main.main 0
+            push constant 4
+            call String.new 1
+            push constant 79
+            call String.appendChar 2
+            push constant 108
+            call String.appendChar 2
+            push constant 97
+            call String.appendChar 2
+            push constant 33
+            call String.appendChar 2
+            call Output.printString 1
+            pop temp 0
+            push constant 0
+            return         
+                """;
+        assertEquals(expected, actual);
+    }
+
+    @Test
     public void methodsConstructorTest () {
         var input = """
             class Point {
