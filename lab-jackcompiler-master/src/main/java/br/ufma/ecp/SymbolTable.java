@@ -1,6 +1,5 @@
 package br.ufma.ecp;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,7 +11,7 @@ public class SymbolTable {
 
     public static record Symbol(String name, String type, Kind kind, int index) {
     }
-    
+
     private Map<String, Symbol> classScope;
     private Map<String, Symbol> subroutineScope;
     private Map<Kind, Integer> countVars;
