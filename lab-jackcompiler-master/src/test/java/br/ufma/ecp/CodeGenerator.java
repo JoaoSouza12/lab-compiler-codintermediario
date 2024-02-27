@@ -302,14 +302,43 @@ label WHILE_END0
         assertEquals(expected, actual);
     }
     @Test
-    public void termExpressionLiteralKeyword () {
+    public void methodTest () {
         var input = """
             class Main {
                 function void main () {
-                    var bool x;
-                    let x = true;
-                    let x = false;
-                    let x = null;
+                    var Point p;
+                    var int x;
+                    let p = Point.new (10, 20);
+                    let x = p.getX();
+                    return;
+                }
+            }
+            """;;
+        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+        parser.parse();
+        String actual = parser.VMOutput();
+        String expected = """
+            function Main.main 2
+            push constant 10
+            push constant 20
+            call Point.new 2
+            pop local 0
+            push local 0
+            call Point.getX 1
+            pop local 1
+            push constant 0
+            return
+                """;
+        assertEquals(expected, actual);
+    }
+    @Test
+    public void doStatement () {
+        var input = """
+            class Main {
+                function void main () {
+                    var int x;
+                    let x = 10;
+                    do Output.printInt(x);
                     return;
                 }
             }
@@ -319,13 +348,11 @@ label WHILE_END0
         String actual = parser.VMOutput();
         String expected = """
             function Main.main 1
-            push constant 0
-            not
+            push constant 10
             pop local 0
-            push constant 0
-            pop local 0
-            push constant 0
-            pop local 0
+            push local 0
+            call Output.printInt 1
+            pop temp 0
             push constant 0
             return
                 """;
