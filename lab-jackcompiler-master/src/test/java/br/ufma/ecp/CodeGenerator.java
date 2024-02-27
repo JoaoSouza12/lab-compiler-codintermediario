@@ -302,6 +302,47 @@ label WHILE_END0
         assertEquals(expected, actual);
     }
     @Test
+    public void whileTest () {
+        var input = """
+            class Main {
+                function void main () {
+                    var int sum, i;
+                    let i = 0;
+                    let sum = 0;
+                    while (i < 10) {
+                        let sum = sum + i;
+                    }
+                    return;
+                }
+            }
+            """;;
+        var parser = new Parser(input.getBytes(StandardCharsets.UTF_8));
+        parser.parse();
+        String actual = parser.VMOutput();
+        String expected = """
+            function Main.main 2
+            push constant 0
+            pop local 1
+            push constant 0
+            pop local 0
+            label WHILE_EXP0
+            push local 1
+            push constant 10
+            lt
+            not
+            if-goto WHILE_END0
+            push local 0
+            push local 1
+            add
+            pop local 0
+            goto WHILE_EXP0
+            label WHILE_END0
+            push constant 0
+            return            
+                """;
+        assertEquals(expected, actual);
+    }
+    @Test
     public void operatorTest () {
         var input = """
             class Main {
