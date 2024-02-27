@@ -494,6 +494,11 @@ public class Parser {
     public String VMOutput() {
         return vmWriter.vmOutput();
 }
+private static void report(int line, String where,
+            String message) {
+        System.err.println(
+                "[line " + line + "] Error" + where + ": " + message);
+    }
 private ParseError error(Token token, String message) {
     if (token.type == TokenType.EOF) {
         report(token.line, " at end", message);
