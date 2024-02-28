@@ -1,5 +1,5 @@
 # Projeto de Compilador - Gerador de Código Intermediário em Jack
-Alunos: João José Penha Sousa
+# Alunos: João José Penha Sousa #
 Este é um projeto de compilador que visa implementar um gerador de código intermediário na linguagem Jack. O objetivo principal deste projeto é fornecer uma ferramenta capaz de traduzir programas escritos em uma linguagem de alto nível para um código intermediário que possa ser posteriormente otimizado e traduzido para um código de máquina específico.
 
 ## Sobre o Projeto
