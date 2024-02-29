@@ -4,7 +4,7 @@ Este é um projeto de compilador que visa implementar um gerador de código inte
 
 ## Sobre o Projeto
 
-O projeto está sendo desenvolvido como parte avaliaação da disciplina de Compiladores, com o professor Sergio Costa, na niversidade Federal do Maranhão, sobre compiladores e linguagens de programação. Ele se concentra na criação de um compilador capaz de traduzir programas escritos em uma linguagem de alto nível para um código intermediário, utilizando a linguagem Jack como base.
+O projeto está sendo desenvolvido como parte avaliação da disciplina de Compiladores, com o professor Sergio Costa, na Universidade Federal do Maranhão, sobre compiladores e linguagens de programação. Ele se concentra na criação de um compilador capaz de traduzir programas escritos em uma linguagem de alto nível para um código intermediário, utilizando a linguagem Jack como base.
 
 O compilador é composto por várias etapas, incluindo análise léxica, análise sintática, análise semântica, geração de código intermediário e otimização de código. Cada etapa do processo de compilação é cuidadosamente projetada e implementada para garantir a precisão e eficiência do compilador.
 
